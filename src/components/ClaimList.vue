@@ -1,26 +1,14 @@
 <template>
   <div class="claim-list">
     <div class="action-bar">
-      <q-btn 
-        flat
-        label="+ Nuevo siniestro" 
-        to="/claims/new" 
-        class="btn-minimalist"
-        no-caps
-        unelevated
-      />
+      <q-btn flat label="+ Nuevo siniestro" to="/claims/new" class="btn-minimalist" no-caps unelevated />
     </div>
 
     <div class="claims-grid">
-      <div 
-        v-for="c in claims" 
-        :key="c.id" 
-        class="minimalist-card claim-card"
-        @click="$router.push(`/claims/${c.id}`)"
-      >
+      <div v-for="c in claims" :key="c.id" class="minimalist-card claim-card" @click="$router.push(`/claims/${c.id}`)">
         <div class="claim-claimNumber">Siniestro {{ c.claimNumber }}</div>
         <div class="claim-header">
-          
+
           <span class="minimalist-badge status-badge">{{ c.status }}</span>
           <span class="claim-date">{{ formatDate(c.incidentDate) }}</span>
         </div>
@@ -41,17 +29,26 @@
 import { ref, onMounted } from 'vue'
 import { getClaims } from 'src/services/claimService'
 import type { Claim } from 'components/models'
+import { Loading } from 'quasar'
 
 const claims = ref<Claim[]>([])
 
 async function load() {
-  claims.value = await getClaims()
+  Loading.show({
+    message: 'Cargando siniestros...',
+    spinnerColor: 'black'
+  })
+  try {
+    claims.value = await getClaims()
+  } finally {
+    Loading.hide()
+  }
 }
 
 function formatDate(d?: string) {
-  if (!d) return '-' 
-  return new Date(d).toLocaleDateString('es-ES', { 
-    day: 'numeric', 
+  if (!d) return '-'
+  return new Date(d).toLocaleDateString('es-ES', {
+    day: 'numeric',
     month: 'short',
     year: 'numeric'
   })

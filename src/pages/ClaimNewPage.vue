@@ -2,67 +2,31 @@
   <q-page class="minimalist-page">
     <div class="minimalist-container">
       <div class="page-header">
-        <q-btn 
-          flat 
-          icon="arrow_back" 
-          to="/claims"
-          class="back-btn"
-          size="sm"
-          round
-        />
+        <q-btn flat icon="arrow_back" to="/claims" class="back-btn" size="sm" round />
         <h1 class="minimalist-title">Nuevo Siniestro</h1>
       </div>
 
       <q-form @submit.prevent="onSubmit" class="minimalist-form">
         <div class="form-group">
           <label class="form-label">Descripción</label>
-          <q-input 
-            v-model="description" 
-            placeholder="Describe el incidente..."
-            outlined
-            type="textarea"
-            rows="4"
-            class="minimalist-input"
-            :rules="[val => val && val.length >= 10 || 'Mínimo 10 caracteres']"
-          />
+          <q-input v-model="description" placeholder="Describe el incidente..." outlined type="textarea" rows="4"
+            class="minimalist-input" :rules="[val => val && val.length >= 10 || 'Mínimo 10 caracteres']" />
         </div>
 
         <div class="form-group">
           <label class="form-label">Ubicación</label>
-          <q-input 
-            v-model="location" 
-            placeholder="Dirección o lugar del incidente"
-            outlined
-            class="minimalist-input"
-            :rules="[val => val && val.length >= 10 || 'Mínimo 10 caracteres']"
-          />
+          <q-input v-model="location" placeholder="Dirección o lugar del incidente" outlined class="minimalist-input"
+            :rules="[val => val && val.length >= 10 || 'Mínimo 10 caracteres']" />
         </div>
 
         <div class="form-group">
           <label class="form-label">Fecha del incidente</label>
-          <q-input 
-            v-model="incidentDate" 
-            type="date" 
-            outlined
-            class="minimalist-input"
-          />
+          <q-input v-model="incidentDate" type="date" outlined class="minimalist-input" />
         </div>
 
         <div class="form-actions">
-          <q-btn 
-            label="Cancelar" 
-            flat
-            to="/claims"
-            class="btn-minimalist-outline"
-            no-caps
-          />
-          <q-btn 
-            label="Crear Siniestro" 
-            type="submit" 
-            class="btn-minimalist"
-            no-caps
-            unelevated
-          />
+          <q-btn label="Cancelar" flat to="/claims" class="btn-minimalist-outline" no-caps />
+          <q-btn label="Crear Siniestro" type="submit" class="btn-minimalist" no-caps unelevated />
         </div>
       </q-form>
     </div>
@@ -72,7 +36,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { Notify } from 'quasar'
+import { Notify, Loading } from 'quasar'
 import { createClaim } from 'src/services/claimService'
 import type { CreateClaimDTO } from 'src/components/models'
 
@@ -109,6 +73,11 @@ async function onSubmit() {
     images: []
   }
 
+  Loading.show({
+    message: 'Creando siniestro...',
+    spinnerColor: 'black'
+  })
+
   try {
     await createClaim(payload)
     await router.push('/claims')
@@ -120,6 +89,8 @@ async function onSubmit() {
     }
     showNotify({ type: 'negative', message })
     console.error('createClaim error:', err)
+  } finally {
+    Loading.hide()
   }
 }
 </script>

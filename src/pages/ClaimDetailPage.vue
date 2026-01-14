@@ -2,14 +2,7 @@
   <q-page class="minimalist-page">
     <div class="minimalist-container">
       <div class="page-header">
-        <q-btn 
-          flat 
-          icon="arrow_back" 
-          to="/claims"
-          class="back-btn"
-          size="sm"
-          round
-        />
+        <q-btn flat icon="arrow_back" to="/claims" class="back-btn" size="sm" round />
         <h1 class="minimalist-title">Detalle del Siniestro</h1>
       </div>
 
@@ -26,33 +19,12 @@
         <div class="update-status-section">
           <h3 class="section-title">Actualizar Estado</h3>
           <div class="status-form">
-            <q-select
-              v-model="newStatus"
-              :options="statusOptions"
-              label="Nuevo Estado"
-              outlined
-              dense
-              class="status-select"
-            />
-            <q-input
-              v-if="newStatus === 'PAGADO' || newStatus === 'APROBADO'"
-              v-model.number="newAmount"
-              label="Monto"
-              type="number"
-              outlined
-              dense
-              prefix="$"
-              class="amount-input"
-            />
-            <q-btn
-              @click="updateStatus"
-              :disable="!newStatus || (newStatus === 'PAGADO' && !newAmount)"
-              :loading="updating"
-              color="primary"
-              label="Actualizar"
-              unelevated
-              class="update-btn"
-            />
+            <q-select v-model="newStatus" :options="statusOptions" label="Nuevo Estado" outlined dense
+              class="status-select" />
+            <q-input v-if="newStatus === 'PAGADO' || newStatus === 'APROBADO'" v-model.number="newAmount" label="Monto"
+              type="number" outlined dense prefix="$" class="amount-input" />
+            <q-btn @click="updateStatus" :disable="!newStatus || (newStatus === 'PAGADO' && !newAmount)"
+              :loading="updating" color="primary" label="Actualizar" unelevated class="update-btn" />
           </div>
         </div>
 
@@ -94,7 +66,7 @@ import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { getClaim, updateClaimStatus } from 'src/services/claimService'
 import type { Claim } from 'components/models'
-import { Notify } from 'quasar'
+import { Notify, Loading } from 'quasar'
 
 const route = useRoute()
 const claim = ref<Claim | null>(null)
@@ -111,17 +83,25 @@ const statusOptions = [
 ]
 
 async function load() {
-  const id = route.params.id as string
-  claim.value = await getClaim(id)
-  newStatus.value = claim.value?.status || ''
-  newAmount.value = claim.value?.amount || null
+  Loading.show({
+    message: 'Cargando detalle...',
+    spinnerColor: 'black'
+  })
+  try {
+    const id = route.params.id as string
+    claim.value = await getClaim(id)
+    newStatus.value = claim.value?.status || ''
+    newAmount.value = claim.value?.amount || null
+  } finally {
+    Loading.hide()
+  }
 }
 
 async function updateStatus() {
   if (!claim.value || !newStatus.value) return
-  
+
   const currentStatus = claim.value.status
-  
+
   // Validar transiciones permitidas
   const allowedTransitions: Record<string, string[]> = {
     'PENDIENTE': ['EN_REVISIÓN'],
@@ -130,7 +110,7 @@ async function updateStatus() {
     'RECHAZADO': [],
     'PAGADO': []
   }
-  
+
   if (!allowedTransitions[currentStatus || '']?.includes(newStatus.value)) {
     Notify.create({
       type: 'negative',
@@ -139,7 +119,7 @@ async function updateStatus() {
     })
     return
   }
-  
+
   if (newStatus.value === 'PAGADO' && !newAmount.value) {
     Notify.create({
       type: 'negative',
@@ -148,12 +128,17 @@ async function updateStatus() {
     })
     return
   }
-  
+
+  Loading.show({
+    message: 'Actualizando estado...',
+    spinnerColor: 'black'
+  })
+
   try {
     updating.value = true
     const id = route.params.id as string
     claim.value = await updateClaimStatus(id, newStatus.value, newAmount.value || undefined)
-    
+
     Notify.create({
       type: 'positive',
       message: 'Estado actualizado correctamente',
@@ -163,7 +148,7 @@ async function updateStatus() {
     const errorMessage = error instanceof Error && 'response' in error && error.response && typeof error.response === 'object' && 'data' in error.response && error.response.data && typeof error.response.data === 'object' && 'error' in error.response.data
       ? String(error.response.data.error)
       : 'Error al actualizar el estado';
-    
+
     Notify.create({
       type: 'negative',
       message: errorMessage,
@@ -171,13 +156,14 @@ async function updateStatus() {
     })
   } finally {
     updating.value = false
+    Loading.hide()
   }
 }
 
 function formatDate(d?: string) {
   if (!d) return '-'
-  return new Date(d).toLocaleDateString('es-ES', { 
-    day: 'numeric', 
+  return new Date(d).toLocaleDateString('es-ES', {
+    day: 'numeric',
     month: 'long',
     year: 'numeric',
     hour: '2-digit',
