@@ -2,8 +2,17 @@
   <q-layout view="lHh Lpr lFf">
     <q-header class="minimalist-header" bordered>
       <q-toolbar class="minimalist-toolbar">
+        <q-btn
+          flat
+          dense
+          round
+          icon="home"
+          to="/"
+          aria-label="Inicio"
+          class="q-mr-sm"
+        />
         <q-toolbar-title class="minimalist-logo">
-          Gestión de Siniestros
+          Sistema de destión de siniestros
         </q-toolbar-title>
       </q-toolbar>
     </q-header>

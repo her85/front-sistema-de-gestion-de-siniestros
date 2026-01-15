@@ -2,7 +2,7 @@
   "name": "front-sistema-de-gestion-de-siniestros",
   "version": "0.0.1",
   "description": "sistema para gestionar siniestros",
-  "productName": "sistema de gestion desiniestros",
+  "productName": "sistema de gestion de siniestros",
   "author": "her85 <herbotto1985@gmail.com>",
   "type": "module",
   "private": true,
