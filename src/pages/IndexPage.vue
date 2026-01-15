@@ -3,7 +3,7 @@
     <!-- Hero Section -->
     <section class="hero-section">
       <div class="hero-content">
-        <h1 class="hero-title">Sistema de destión de siniestros</h1>
+        <h1 class="hero-title">Sistema de gestión de siniestros</h1>
         <p class="hero-subtitle">
           Administra y controla todos tus siniestros de manera eficiente y organizada
         </p>
@@ -46,7 +46,7 @@
           <div class="col-12 col-md-4">
             <q-card class="feature-card">
               <q-card-section class="text-center">
-                <q-icon name="trending_up" size="64px" color="secondary" />
+                <q-icon name="trending_up" size="64px" color="info" />
                 <h3 class="q-mt-md q-mb-sm">Seguimiento en Tiempo Real</h3>
                 <p class="text-grey-7">
                   Monitorea el estado y progreso de cada siniestro al instante
@@ -85,7 +85,7 @@
 
 <style scoped lang="scss">
 .hero-section {
-  background: linear-gradient(135deg, #3f3f3f 0%, #080808 100%);
+  background: linear-gradient(135deg, var(--q-info) 0%, #080808 100%);
   color: white;
   min-height: 500px;
   display: flex;

@@ -12,7 +12,7 @@
           class="q-mr-sm"
         />
         <q-toolbar-title class="minimalist-logo">
-          Sistema de destión de siniestros
+          Sistema de gestión de siniestros
         </q-toolbar-title>
       </q-toolbar>
     </q-header>
