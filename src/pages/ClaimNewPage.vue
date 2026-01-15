@@ -38,6 +38,7 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { Notify, Loading } from 'quasar'
 import { createClaim } from 'src/services/claimService'
+import { sanitizeString, sanitizeDate, validateStringLength } from 'src/utils/sanitizer'
 import type { CreateClaimDTO } from 'src/components/models'
 
 const router = useRouter()
@@ -54,22 +55,30 @@ function showNotify(opts: { type?: string; message: string }) {
 }
 
 async function onSubmit() {
-  // Validación básica en cliente
-  if (description.value.trim().length < 10) {
-    showNotify({ type: 'negative', message: 'La descripción debe tener al menos 10 caracteres' })
+  // Sanitizar y validar en cliente usando librerías especializadas
+  const sanitizedDescription = sanitizeString(description.value)
+  if (!validateStringLength(sanitizedDescription, 10, 1000)) {
+    showNotify({ type: 'negative', message: 'La descripción debe tener entre 10 y 1000 caracteres' })
     return
   }
 
-  if (!location.value || !location.value.trim()) {
-    showNotify({ type: 'negative', message: 'La ubicación es requerida' })
+  const sanitizedLocation = sanitizeString(location.value)
+  if (!validateStringLength(sanitizedLocation, 3, 200)) {
+    showNotify({ type: 'negative', message: 'La ubicación debe tener entre 3 y 200 caracteres' })
+    return
+  }
+
+  const sanitizedDate = sanitizeDate(incidentDate.value)
+  if (!sanitizedDate) {
+    showNotify({ type: 'negative', message: 'Fecha del incidente inválida' })
     return
   }
 
   const payload: CreateClaimDTO = {
     userId: 'anonymous',
-    description: description.value.trim(),
-    incidentDate: incidentDate.value ? new Date(incidentDate.value).toISOString() : new Date().toISOString(),
-    location: location.value.trim(),
+    description: sanitizedDescription,
+    incidentDate: sanitizedDate,
+    location: sanitizedLocation,
     images: []
   }
 
