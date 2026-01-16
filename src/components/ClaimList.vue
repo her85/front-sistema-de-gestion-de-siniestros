@@ -4,20 +4,30 @@
       <q-btn flat label="+ Nuevo siniestro" to="/claims/new" class="btn-minimalist" no-caps unelevated />
     </div>
 
-    <div class="claims-grid">
-      <div v-for="c in claims" :key="c.id" class="minimalist-card claim-card" @click="$router.push(`/claims/${c.id}`)">
-        <div class="claim-claimNumber">Siniestro {{ c.claimNumber }}</div>
-        <div class="claim-header">
-
-          <span class="minimalist-badge status-badge">{{ c.status }}</span>
-          <span class="claim-date">{{ formatDate(c.incidentDate) }}</span>
-        </div>
-        <div class="claim-description">{{ c.description }}</div>
-        <div class="claim-footer" v-if="c.amount">
-          <span class="claim-amount">{{ formatAmount(c.amount) }}</span>
-        </div>
-      </div>
-    </div>
+    <q-table :rows="claims" :columns="columns" row-key="id" flat bordered
+      @row-click="(evt, row) => $router.push(`/claims/${row.id}`)" :rows-per-page-options="[10, 25, 50]"
+      class="claims-table">
+      <template v-slot:body-cell-claimNumber="props">
+        <q-td :props="props">
+          <span class="claim-number">{{ props.value }}</span>
+        </q-td>
+      </template>
+      <template v-slot:body-cell-status="props">
+        <q-td :props="props">
+          <span class="minimalist-badge status-badge">{{ props.value }}</span>
+        </q-td>
+      </template>
+      <template v-slot:body-cell-incidentDate="props">
+        <q-td :props="props">
+          {{ formatDate(props.value) }}
+        </q-td>
+      </template>
+      <template v-slot:body-cell-amount="props">
+        <q-td :props="props">
+          <span class="claim-amount">{{ props.value ? formatAmount(props.value) : '-' }}</span>
+        </q-td>
+      </template>
+    </q-table>
 
     <div v-if="claims.length === 0" class="empty-state">
       <p class="minimalist-subtitle">No hay siniestros registrados</p>
@@ -32,6 +42,37 @@ import type { Claim } from 'components/models'
 import { Loading } from 'quasar'
 
 const claims = ref<Claim[]>([])
+
+const columns = [
+  {
+    name: 'claimNumber',
+    label: 'Número',
+    field: 'claimNumber',
+    align: 'left' as const,
+    sortable: true
+  },
+    {
+    name: 'incidentDate',
+    label: 'Fecha',
+    field: 'incidentDate',
+    align: 'left' as const,
+    sortable: true
+  },
+  {
+    name: 'status',
+    label: 'Estado',
+    field: 'status',
+    align: 'left' as const,
+    sortable: true
+  },
+  {
+    name: 'amount',
+    label: 'Monto',
+    field: 'amount',
+    align: 'right' as const,
+    sortable: true
+  }
+]
 
 async function load() {
   Loading.show({
@@ -84,76 +125,50 @@ onMounted(load)
   font-weight: 500;
 }
 
-.claims-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 0.75rem;
+.claims-table {
+  :deep(.q-table__top) {
+    padding: 0;
+  }
+
+  :deep(.q-table thead th) {
+    font-weight: 600;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    background-color: #fafafa;
+    color: #666;
+  }
+
+  :deep(.q-table tbody td) {
+    font-size: 0.875rem;
+  }
+
+  :deep(.q-table tbody tr) {
+    cursor: pointer;
+    transition: background-color 0.2s;
+
+    &:hover {
+      background-color: #f9f9f9;
+    }
+  }
 }
 
-.claim-claimNumber {
-  font-size: 0.875rem;
+.claim-number {
   font-weight: 600;
   color: #000;
 }
 
-@media (min-width: 768px) {
-  .claims-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1rem;
-  }
-}
-
-@media (min-width: 1024px) {
-  .claims-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-.claim-card {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.claim-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 0.5rem;
-}
-
 .status-badge {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
   text-transform: uppercase;
   font-size: 0.625rem;
   letter-spacing: 0.05em;
-}
-
-.claim-date {
-  font-size: 0.75rem;
-  color: #999;
-}
-
-.claim-description {
-  font-size: 0.9375rem;
-  font-weight: 500;
-  color: #000;
-  line-height: 1.4;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.claim-footer {
-  display: flex;
-  justify-content: flex-end;
-  padding-top: 0.5rem;
-  border-top: 1px solid #f0f0f0;
+  background-color: #f0f0f0;
+  border-radius: 4px;
 }
 
 .claim-amount {
-  font-size: 0.875rem;
   font-weight: 600;
   color: #000;
 }

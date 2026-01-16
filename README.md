@@ -488,4 +488,4 @@ Para preguntas o problemas:
 
 ---
 
-Desarrollado con ❤️ usando Vue 3, Quasar Framework y TypeScript
+Desarrollado con Vue 3, Quasar Framework y TypeScript
